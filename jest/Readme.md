@@ -20,7 +20,7 @@ npm install --save-dev jest
 
 ### Configuración
 
-La configuración de Jest se realiza a través de un archivo `jest.config.js` en la raíz del proyecto. En este archivo, se pueden especificar opciones de configuración como rutas de archivos, transformadores, y más.
+Jest no necesita de una inicial, pero se puede realizar una a través de un archivo `jest.config.js` en la raíz del proyecto. En este archivo, se pueden especificar opciones de configuración como rutas de archivos, transformadores, y más.
 
 A continuacion se muestra un ejemplo de archivo de configuración básico:
 
@@ -239,19 +239,19 @@ const axios = require('axios');
 jest.mock('axios');
 
 describe('fetchData', () => {
-  test('fetches data successfully', async () => {
+  test('Mocked fetchData', async () => {
     const data = { id: 1, name: 'John Doe' };
     axios.get.mockResolvedValue({ data });
 
-    const result = await fetchData('https://pokeapi.co/api/v2/pokemon/1/');
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
     expect(result).toEqual(data);
   });
 
-  test('handles errors when fetching data', async () => {
+  test('Handles error with mocked fetchData', async () => {
     const error = new Error('Failed to fetch data');
     axios.get.mockRejectedValue(error);
 
-    const result = await fetchData('https://pokeapi.co/api/v2/pokemon/1/');
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
     expect(result).toBeNull();
   });
 });
@@ -264,31 +264,70 @@ Por otro lado, un spy se puede utilizar para verificar si una función ha sido l
 const fetchData = require('./fetchData');
 
 describe('fetchData', () => {
-  test('fetches data successfully', async () => {
+  test('Mocked fechData', async () => {
     const axiosSpy = jest.spyOn(axios, 'get');
     const data = { id: 1, name: 'John Doe' };
     axiosSpy.mockResolvedValue({ data });
 
-    const result = await fetchData('https://pokeapi.co/api/v2/pokemon/1/');
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
     expect(result).toEqual(data);
-    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon/1/');
+    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon-form/1/');
   });
 
-  test('handles errors when fetching data', async () => {
+  test('Handles error with mocked fetchData', async () => {
     const axiosSpy = jest.spyOn(axios, 'get');
     const error = new Error('Failed to fetch data');
     axiosSpy.mockRejectedValue(error);
 
-    const result = await fetchData('https://pokeapi.co/api/v2/pokemon/1/');
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
     expect(result).toBeNull();
-    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon/1/');
+    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon-form/1/');
   });
 });
 ```
-Dado que spyOn aparentemente realiza lo mismo que mock, ¿cuál es la diferencia entre ellos? La necesidad de recuperar o no la implementación original de la función o módulo. Si se necesita recuperar la implementación original, se debe usar spyOn, de lo contrario, se puede usar mock.
+Dado que spyOn aparentemente realiza lo mismo que mock, ¿cuál es la diferencia entre ellos? 
 
-¿Cómo recupero la implementación original de una función o módulo? 
-Para recuperar la implementación original de una función o módulo, se puede utilizar la función `mockRestore` en un spy creado con `jest.spyOn`.
+Retornemos a los test donde se utilizó mock:
+```javascript
+// fetchData.test.js
+const fetchData = require('./fetchData');
+const axios = require('axios');
+
+jest.mock('axios');
+
+describe('fetchData', () => {
+  test('Mocked fetchData', async () => {
+    const data = { id: 1, name: 'John Doe' };
+    axios.get.mockResolvedValue({ data });
+
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
+    expect(result).toEqual(data);
+  });
+
+  test('Handles error with mocked fetchData', async () => {
+    const error = new Error('Failed to fetch data');
+    axios.get.mockRejectedValue(error);
+
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
+    expect(result).toBeNull();
+  });
+});
+```
+
+A esa test suite agreguemos un test más:
+```javascript
+test('Original fetchData', async () => {
+
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
+    expect(result).toEqual({"form_name":"","form_names":[],"form_order":1,"id":1,"is_battle_only":false,"is_default":true,"is_mega":false,"name":"bulbasaur","names":[],"order":1,"pokemon":{"name":"bulbasaur","url":"https://pokeapi.co/api/v2/pokemon/1/"},"sprites":{"back_default":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png","back_female":null,"back_shiny":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/1.png","back_shiny_female":null,"front_default":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png","front_female":null,"front_shiny":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png","front_shiny_female":null},"types":[{"slot":1,"type":{"name":"grass","url":"https://pokeapi.co/api/v2/type/12/"}},{"slot":2,"type":{"name":"poison","url":"https://pokeapi.co/api/v2/type/4/"}}],"version_group":{"name":"red-blue","url":"https://pokeapi.co/api/v2/version-group/1/"}});
+  });
+```
+¿Qué sucede con el test?
+
+El test falla, ya que axios.get conserva el valor que se le asignó en el test anterior, por lo que no se realiza la llamada a la API y el resultado esperado no es el correcto.
+
+¿Cómo se puede solucionar este problema?
+Para recuperar la implementación original de una función o módulo, se puede utilizar spyOn para crear un mock temporal y restaurar la implementación original después de cada prueba utilizando el método `mockRestore`.
 
 ```javascript
 // fetchData.test.js
@@ -296,16 +335,54 @@ const fetchData = require('./fetchData');
 const axios = require('axios');
 
 describe('fetchData', () => {
-  test('fetches data successfully', async () => {
+  
+  test('Mocked fetchData', async () => {
     const axiosSpy = jest.spyOn(axios, 'get');
     const data = { id: 1, name: 'John Doe' };
     axiosSpy.mockResolvedValue({ data });
 
-    const result = await fetchData('https://pokeapi.co/api/v2/pokemon/1/');
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
     expect(result).toEqual(data);
-    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon/1/');
+    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon-form/1/');
 
     axiosSpy.mockRestore();
+  });
+
+  test('Original fetchData', async () => {
+
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
+    expect(result).toEqual({"form_name":"","form_names":[],"form_order":1,"id":1,"is_battle_only":false,"is_default":true,"is_mega":false,"name":"bulbasaur","names":[],"order":1,"pokemon":{"name":"bulbasaur","url":"https://pokeapi.co/api/v2/pokemon/1/"},"sprites":{"back_default":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png","back_female":null,"back_shiny":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/1.png","back_shiny_female":null,"front_default":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png","front_female":null,"front_shiny":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png","front_shiny_female":null},"types":[{"slot":1,"type":{"name":"grass","url":"https://pokeapi.co/api/v2/type/12/"}},{"slot":2,"type":{"name":"poison","url":"https://pokeapi.co/api/v2/type/4/"}}],"version_group":{"name":"red-blue","url":"https://pokeapi.co/api/v2/version-group/1/"}});
+  });
+});
+```
+
+Otra forma de solucionar el problema es utilizando `jest.restoreAllMocks()` dentro de un `afterEach` para restaurar todas las implementaciones de mocks creadas con `jest.spyOn` después de cada prueba.
+
+```javascript
+// fetchData.test.js
+const fetchData = require('./fetchData');
+const axios = require('axios');
+
+describe('fetchData', () => {
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('Mocked fetchData', async () => {
+    const axiosSpy = jest.spyOn(axios, 'get');
+    const data = { id: 1, name: 'John Doe' };
+    axiosSpy.mockResolvedValue({ data });
+
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
+    expect(result).toEqual(data);
+    expect(axiosSpy).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon-form/1/');
+  });
+
+  test('Original fetchData', async () => {
+
+    const result = await fetchData('https://pokeapi.co/api/v2/pokemon-form/1/');
+    expect(result).toEqual({"form_name":"","form_names":[],"form_order":1,"id":1,"is_battle_only":false,"is_default":true,"is_mega":false,"name":"bulbasaur","names":[],"order":1,"pokemon":{"name":"bulbasaur","url":"https://pokeapi.co/api/v2/pokemon/1/"},"sprites":{"back_default":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png","back_female":null,"back_shiny":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/1.png","back_shiny_female":null,"front_default":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png","front_female":null,"front_shiny":"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png","front_shiny_female":null},"types":[{"slot":1,"type":{"name":"grass","url":"https://pokeapi.co/api/v2/type/12/"}},{"slot":2,"type":{"name":"poison","url":"https://pokeapi.co/api/v2/type/4/"}}],"version_group":{"name":"red-blue","url":"https://pokeapi.co/api/v2/version-group/1/"}});
   });
 });
 ```
