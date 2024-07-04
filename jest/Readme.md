@@ -20,7 +20,7 @@ npm install --save-dev jest
 
 ### Configuración
 
-Jest no necesita de una inicial, pero se puede realizar una a través de un archivo `jest.config.js` en la raíz del proyecto. En este archivo, se pueden especificar opciones de configuración como rutas de archivos, transformadores, y más.
+Jest no necesita de una configuración inicial, pero se puede realizar una a través de un archivo `jest.config.js` en la raíz del proyecto. En este archivo, se pueden especificar opciones de configuración como rutas de archivos, transformadores, y más.
 
 A continuacion se muestra un ejemplo de archivo de configuración básico:
 
