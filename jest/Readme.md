@@ -39,17 +39,17 @@ A continuacion se muestra un ejemplo de archivo de configuración básico:
 }
 ```
 
-Test Environment: Especifica el entorno en el que se ejecutarán las pruebas. En este caso, se utiliza el entorno de Node.js.
+**Test Environment**: Especifica el entorno en el que se ejecutarán las pruebas. En este caso, se utiliza el entorno de Node.js.
 
-Verbose: Indica si Jest debe mostrar información detallada durante la ejecución de las pruebas.
+**Verbose**: Indica si Jest debe mostrar información detallada durante la ejecución de las pruebas.
 
-Cache: Habilita o deshabilita la caché de resultados de pruebas.
+**Cache**: Habilita o deshabilita la caché de resultados de pruebas.
 
-Transform: Permite especificar transformadores para archivos específicos, como Babel para archivos de JavaScript.
+**Transform**: Permite especificar transformadores para archivos específicos, como Babel para archivos de JavaScript.
 
-Test Match: Define los patrones de archivos que Jest debe considerar como pruebas.
+**Test Match**: Define los patrones de archivos que Jest debe considerar como pruebas.
 
-Test Path Ignore Patterns: Especifica los patrones de archivos que Jest debe ignorar al buscar pruebas.
+**Test Path Ignore Patterns**: Especifica los patrones de archivos que Jest debe ignorar al buscar pruebas.
 
 ### Script para la Ejecución de Pruebas
 
